@@ -50,7 +50,6 @@ function makeApiCall(productCode) {
                 return true;
             }
         }
-}
 
 // Other functions remain unchanged
 

@@ -30,17 +30,21 @@ function makeApiCall(productCode) {
                 // Check if it has non-vegan ingredients
                 if (cleanedIngredients['non-vegan']) {
                     const nonVeganIngredients = cleanedIngredients['non-vegan'].join(', ');
-                    displayBanner('red', `This is not vegan. Ingredients: ${nonVeganIngredients}`);
+
+                    // Check if any non-vegan ingredient includes the word "powder"
+                    if (checkForPowderIngredient(cleanedIngredients['non-vegan'])) {
+                        displayBanner('green', 'This is vegan.');
+                    } else {
+                        displayBanner('red', `This is not vegan. Ingredients: ${nonVeganIngredients}`);
+                    }
                 }
                 // Check if it has non-vegetarian ingredients
                 else if (cleanedIngredients['non-vegetarian']) {
                     const nonVegetarianIngredients = cleanedIngredients['non-vegetarian'].join(', ');
                     displayBanner('orange', `Note: This is vegetarian. Non-vegetarian ingredients: ${nonVegetarianIngredients}`);
                 }
-                // If it has only ingredients with vegan or vegetarian status unknown
-                else if (cleanedIngredients['vegan-status-unknown'] || cleanedIngredients['vegetarian-status-unknown']) {
-                    const veganIngredients = cleanedIngredients['vegan-status-unknown'].join(', ');
-                    displayBanner('green', `This is vegan. Ingredients: ${veganIngredients}`);
+                else {
+                    displayBanner('green', 'This is vegan.');
                 }
             }
 
@@ -49,8 +53,13 @@ function makeApiCall(productCode) {
         .catch(error => {
             console.error('Error fetching data:', error);
         });
-
 }
+
+function checkForPowderIngredient(ingredients) {
+    // Check if any ingredient includes the word "powder"
+    return ingredients.some(ingredient => ingredient.toLowerCase().includes('powder'));
+}
+
 function displayBanner(color, message) {
     const bannerElement = document.createElement('div');
     bannerElement.style.backgroundColor = color;
@@ -80,7 +89,7 @@ function resetUI() {
 
 // Start QR code scanning
 function startQRCodeScanning() {
-    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+    const config = { fps: 10, qrbox: { width: 200, height: 200 } };
     html5Qrcode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback);
 }
 

@@ -56,6 +56,16 @@ function makeApiCall(productCode) {
         .catch(error => {
             console.error('Error fetching data:', error);
         });
+
+        function checkForPowderIngredient(ingredients) {
+            if(ingredients.some(ingredient => ingredient.toLowerCase().includes('powder'))) {
+                return true;
+            }
+            
+            if(ingredients.some(ingredient => ingredient.toLowerCase().includes('vet'))) {
+                return true;
+            }
+        }
 }
 
 // Other functions remain unchanged

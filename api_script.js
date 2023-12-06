@@ -16,19 +16,34 @@ function makeApiCall(productCode) {
         .then(data => {
             console.log('API Response:', data);
 
-            // Extract and log the ingredients information
-            const ingredients = data.product.ingredients;
-            console.log('Ingredients:', ingredients);
-            if (ingredients) {
-                // Check if any ingredient is not vegan or not vegetarian
-                const nonVeganIngredients = ingredients.filter(ingredient => ingredient.vegan === 'no');
-                const nonVegetarianIngredients = ingredients.filter(ingredient => ingredient.vegetarian === 'no');
+            // Extract and log the ingredients analysis information
+            const ingredientsAnalysis = data.product.ingredients_analysis;
+            console.log('Ingredients analysis:', ingredientsAnalysis);
+            if (ingredientsAnalysis) {
+                // Remove the "en:" prefix from ingredient categories
+                const cleanedIngredients = Object.keys(ingredientsAnalysis).reduce((acc, category) => {
+                    const cleanedCategory = category.replace(/^en:/, ''); // Remove "en:" prefix
+                    acc[cleanedCategory] = ingredientsAnalysis[category].map(ingredient => ingredient.replace(/^en:/, '')); // Remove "en:" prefix from ingredients
+                    return acc;
+                }, {});
 
-                if (nonVeganIngredients.length > 0) {
-                    displayBanner('red', `This is not vegan. Non-vegan ingredients: ${nonVeganIngredients.map(ingredient => ingredient.text).join(', ')}`);
-                } else if (nonVegetarianIngredients.length > 0) {
-                    displayBanner('orange', `Note: This is vegetarian. Non-vegetarian ingredients: ${nonVegetarianIngredients.map(ingredient => ingredient.text).join(', ')}`);
-                } else {
+                // Check if it has non-vegan ingredients
+                if (cleanedIngredients['non-vegan']) {
+                    const nonVeganIngredients = cleanedIngredients['non-vegan'].join(', ');
+
+                    // Check if any non-vegan ingredient includes the word "powder"
+                    if (checkForPowderIngredient(cleanedIngredients['non-vegan'])) {
+                        displayBanner('green', 'This is vegan.');
+                    } else {
+                        displayBanner('red', `This is not vegan. Ingredients: ${nonVeganIngredients}`);
+                    }
+                }
+                // Check if it has non-vegetarian ingredients
+                else if (cleanedIngredients['non-vegetarian']) {
+                    const nonVegetarianIngredients = cleanedIngredients['non-vegetarian'].join(', ');
+                    displayBanner('orange', `Note: This is vegetarian. Non-vegetarian ingredients: ${nonVegetarianIngredients}`);
+                }
+                else {
                     displayBanner('green', 'This is vegan.');
                 }
             }
@@ -39,7 +54,6 @@ function makeApiCall(productCode) {
             console.error('Error fetching data:', error);
         });
 }
-
 
         function checkForPowderIngredient(ingredients) {
             if(ingredients.some(ingredient => ingredient.toLowerCase().includes('powder'))) {

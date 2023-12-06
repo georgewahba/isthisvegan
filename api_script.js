@@ -6,7 +6,7 @@ function makeApiCall(productCode) {
         .then(response => {
             if (!response.ok) {
                 if (response.status === 404) {
-                    console.log('Product not found in the database');
+                    displayBanner('orange', 'Product not found in the database. Sorry for the inconvenience.');
                 } else {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
@@ -19,6 +19,9 @@ function makeApiCall(productCode) {
             // Extract and log the ingredients analysis information
             const ingredientsAnalysis = data.product.ingredients_analysis;
             console.log('Ingredients analysis:', ingredientsAnalysis);
+            if (ingredientsAnalysis === undefined) { 
+                displayBanner('orange', 'Ingredients not found in the database. Sorry for the inconvenience.');
+            }
             if (ingredientsAnalysis) {
                 // Remove the "en:" prefix from ingredient categories
                 const cleanedIngredients = Object.keys(ingredientsAnalysis).reduce((acc, category) => {
@@ -55,11 +58,9 @@ function makeApiCall(productCode) {
         });
 }
 
-function checkForPowderIngredient(ingredients) {
-    // Check if any ingredient includes the word "powder"
-    return ingredients.some(ingredient => ingredient.toLowerCase().includes('powder'));
-}
+// Other functions remain unchanged
 
+// Display a banner with the given color and message
 function displayBanner(color, message) {
     const bannerElement = document.createElement('div');
     bannerElement.style.backgroundColor = color;
